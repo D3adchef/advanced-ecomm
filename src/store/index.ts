@@ -1,5 +1,6 @@
+// src/store/index.ts
 import { configureStore } from '@reduxjs/toolkit';
-import cartReducer from '../features/cart.Reducer';
+import cartReducer from '../features/cart/cartReducer';
 
 // 🧠 Load from sessionStorage
 const loadCartFromSession = () => {

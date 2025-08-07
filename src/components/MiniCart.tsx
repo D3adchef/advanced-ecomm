@@ -1,14 +1,15 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store';
-import { removeFromCart } from '../features/cart.Reducer';
+import { removeFromCart } from '../features/cart/cartReducer';
 import { Link } from 'react-router-dom';
 
 const MiniCart: React.FC = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  const handleRemove = (id: number) => {
+  // FIX: id should be a string
+  const handleRemove = (id: string) => {
     dispatch(removeFromCart(id));
   };
 
@@ -28,6 +29,10 @@ const MiniCart: React.FC = () => {
                 <small>Qty: {item.quantity}</small>
               </div>
               <div>
+                {/* 
+                  Use .toString() only if there's a chance item.id could be a number.
+                  If always a string (from Firebase), you can just use item.id
+                */}
                 <button onClick={() => handleRemove(item.id)} style={{ fontSize: '0.8rem' }}>❌</button>
               </div>
             </div>

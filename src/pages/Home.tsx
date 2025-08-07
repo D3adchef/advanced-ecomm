@@ -1,78 +1,41 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import {
-  fetchAllProducts,
-  fetchCategories,
-  fetchProductsByCategory,
-} from '../api/products';
-
+// src/pages/Home.tsx
+import { useEffect, useState } from 'react';
+import { db } from '../firebase';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../features/cart.Reducer';
+import { addToCart } from '../features/cart/cartReducer';
 
-const Home: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
+const Home = () => {
+  const [products, setProducts] = useState<any[]>([]);
   const dispatch = useDispatch();
 
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      const productList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProducts(productList);
+    };
+    fetchProducts();
+  }, []);
 
-  const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products', selectedCategory],
-    queryFn: () =>
-      selectedCategory === 'all'
-        ? fetchAllProducts()
-        : fetchProductsByCategory(selectedCategory),
-  });
-
-  if (isLoading) return <p>Loading products...</p>;
-  if (error instanceof Error) return <p>Error: {error.message}</p>;
+  const handleDelete = async (id: string) => {
+    await deleteDoc(doc(db, 'products', id));
+    setProducts((prev) => prev.filter((product) => product.id !== id));
+  };
 
   return (
-    <div className="container">
-      <h1>All Products</h1>
-
-      {/* Category Filter */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label htmlFor="category-select">Filter by Category: </label>
-        <select
-          id="category-select"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="all">All</option>
-          {categories?.map((cat: string) => (
-            <option key={cat} value={cat}>
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Product List */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        {products?.map((product: any) => (
-          <div key={product.id} className="card">
-            <img src={product.image} alt={product.title} />
+    <div>
+      <h2>All Products</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+        {products.map((product) => (
+          <div key={product.id} style={{ border: '1px solid red', padding: '1rem' }}>
+            <img src={product.image} alt={product.title} style={{ width: '100%' }} />
             <h3>{product.title}</h3>
             <p>${product.price}</p>
-
-            <button
-              onClick={() =>
-                dispatch(
-                  addToCart({
-                    id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1,
-                  })
-                )
-              }
-            >
+            <button onClick={() => dispatch(addToCart({ ...product, quantity: 1 }))}>
               Add to Cart
             </button>
+            <button onClick={() => handleDelete(product.id)}>Delete</button>
           </div>
         ))}
       </div>
