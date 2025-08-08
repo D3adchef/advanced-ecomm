@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  # Make these available to all jobs (they come from repo secrets)
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 jobs:
   ci:
     name: Build & Test
@@ -26,11 +31,11 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build
+      - name: Build app (vite)
         run: npm run build
 
   deploy:
-    name: Deploy to Vercel
+    name: Deploy to Vercel (prod)
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -44,17 +49,14 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install deps
-        run: npm install
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      - name: Build
-        run: npm run build
+      - name: Pull Vercel env (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy
-        uses: vercel/action@v3
-        with:
-          token: ${{ secrets.VERCEL_TOKEN }}       # your personal token
-          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          org-id: ${{ secrets.VERCEL_ORG_ID }}     # e.g. joseph-marquis-projects
-          # If you want to force production on deploy, add:
-          # vercel-args: '--prod'
+      - name: Build with Vercel (prebuilt output)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt output to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
