@@ -17,11 +17,11 @@ jobs:
       - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Run tests
         run: npm test
@@ -41,19 +41,20 @@ jobs:
       - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      - name: Deploy
+        uses: vercel/action@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          prod: true
+          token: ${{ secrets.VERCEL_TOKEN }}       # your personal token
+          project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          org-id: ${{ secrets.VERCEL_ORG_ID }}     # e.g. joseph-marquis-projects
+          # If you want to force production on deploy, add:
+          # vercel-args: '--prod'
