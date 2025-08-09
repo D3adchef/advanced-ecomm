@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://D3adchef.github.io/advanced-ecomm",
  "scripts": {
   "dev": "vite",
   "build": "tsc -b && vite build",
