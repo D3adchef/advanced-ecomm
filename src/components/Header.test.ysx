@@ -1,0 +1,20 @@
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import cartReducer from '../store/cartReducer'; // adjust path
+import Header from './Header'; // adjust path
+
+function renderWithStore(preloadedState = { cart: { items: [] } }) {
+  const store = configureStore({ reducer: { cart: cartReducer }, preloadedState });
+  return render(
+    <Provider store={store}>
+      <Header />
+    </Provider>
+  );
+}
+
+test('shows cart count', () => {
+  renderWithStore({ cart: { items: [{ id: 1, qty: 1 }] } });
+  expect(screen.getByText(/cart/i)).toBeInTheDocument();
+  expect(screen.getByText(/1/)).toBeInTheDocument();
+});

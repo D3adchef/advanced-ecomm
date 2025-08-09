@@ -21,7 +21,10 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* ✅ Add this: */
+    "types": ["jest", "node"]
   },
-  "include": ["src"]
+  "include": ["src", "jest.config.mjs", "tsconfig.jest.json"]
 }
